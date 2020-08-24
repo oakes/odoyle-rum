@@ -3,7 +3,10 @@
             [ring.middleware.resource :refer [wrap-resource]]
             [ring.middleware.content-type :refer [wrap-content-type]]
             [ring.util.response :refer [not-found]]
-            [clojure.java.io :as io])
+            [clojure.java.io :as io]
+            [rum.core :as rum]
+            [odoyle-frame.core :as c]
+            [clojure.string :as str])
   (:gen-class))
 
 (def port 3000)
@@ -14,7 +17,8 @@
   [request]
   {:status 200
    :headers {"Content-Type" "text/html"}
-   :body (-> "public/index.html" io/resource slurp)})
+   :body (-> "public/index.html" io/resource slurp
+             (str/replace "{{app}}" (rum/render-html (c/app (atom {:text "Test"})))))})
 
 (defmethod handler :default
   [request]

@@ -1,5 +1,6 @@
 (ns odoyle-frame.core
   (:require [rum.core :as rum]))
 
-(rum/defc repeat-label [n text]
-  [:div (replicate n [:.label text])])
+(rum/defc app < rum/reactive [*state]
+  (let [{:keys [text]} @*state]
+    [:div text]))

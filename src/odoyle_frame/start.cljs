@@ -2,4 +2,6 @@
   (:require [odoyle-frame.core :as c]
             [rum.core :as rum]))
 
-(rum/mount (c/repeat-label 5 "abc") (js/document.querySelector "#content"))
+(def *state (atom {:text "Hello, world!"}))
+
+(rum/mount (c/app *state) (js/document.querySelector "#app"))
