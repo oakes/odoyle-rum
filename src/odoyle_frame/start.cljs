@@ -1,12 +1,5 @@
 (ns odoyle-frame.start
-  (:require [reagent.core :as r]))
+  (:require [odoyle-frame.core :as c]
+            [rum.core :as rum]))
 
-(defn content [state]
-  [:div (:text @state)])
-
-(defn init []
-  (let [state (r/atom {:text "Hello, world!"})]
-    (r/render-component [content state]
-                        (.querySelector js/document "#content"))))
-
-(init)
+(rum/mount (c/repeat-label 5 "abc") (js/document.querySelector "#content"))
