@@ -18,7 +18,7 @@
   {:status 200
    :headers {"Content-Type" "text/html"}
    :body (-> "public/index.html" io/resource slurp
-             (str/replace "{{app}}" (rum/render-html (c/app (atom {:text "Test"})))))})
+             (str/replace "{{app}}" (rum/render-html (c/app c/*state))))})
 
 (defmethod handler :default
   [request]
