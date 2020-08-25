@@ -1,18 +1,12 @@
 (ns odoyle-frame.core
   (:require [rum.core :as rum]
-            [odoyle.rules :as o]))
+            [odoyle.rules :as o]
+            [odoyle.rum :as r]))
 
 (defn click [state]
   (-> state
       (o/insert ::global ::event ::click)
       o/fire-rules))
-
-(rum/defc app < rum/reactive [*state]
-  (let [{:keys [clicks]} (-> (rum/react *state)
-                             (o/query-all ::get-clicks)
-                             first)]
-    [:button {:on-click #(swap! *state click)}
-     (str "Clicked " clicks " " (if (= 1 clicks) "time" "times"))]))
 
 (def rules
   (o/ruleset
@@ -26,6 +20,19 @@
      [:what
       [::global ::clicks clicks]]}))
 
-(def *state (-> (reduce o/add-rule (o/->session) rules)
+(declare *state)
+
+(def comps
+  (r/compset
+    {::app
+     [:what
+      [::global ::clicks clicks]
+      :then
+      [:button {:on-click #(swap! *state click)}
+       (str "Clicked " clicks " " (if (= 1 clicks) "time" "times"))]]}))
+
+(def *state (-> (reduce o/add-rule (o/->session) (concat rules comps))
                 (o/insert ::global ::clicks 0)
+                o/fire-rules
                 atom))
+
