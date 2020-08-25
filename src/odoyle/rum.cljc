@@ -28,28 +28,30 @@
       *local)))
 
 (defn reactive [*state]
-  (let [global-key (random-uuid)]
-    {:init
-     (fn [state props]
+  {:init
+   (fn [state props]
+     (let [global-key (random-uuid)]
        (when-let [cmp (:rum/react-component state)]
          (add-watch *state global-key
                     (fn [_ _ p n]
                       (when (not= p n)
                         (.forceUpdate cmp)))))
-       (assoc state ::local-pointer (clojure.core/atom nil)))
-     :wrap-render
-     (fn [render-fn]
-       (fn [state]
-         (binding [*local-pointer* (::local-pointer state)
-                   *react-component* (:rum/react-component state)
-                   *can-return-atom?* (volatile! true)]
-           (render-fn state))))
-     :will-unmount
+       (assoc state
+         ::local-pointer (clojure.core/atom nil)
+         ::global-key global-key)))
+   :wrap-render
+   (fn [render-fn]
      (fn [state]
-       (remove-watch *state global-key)
-       (when-let [*local @(::local-pointer state)]
-         (remove-watch *local ::local))
-       (dissoc state ::local-pointer))}))
+       (binding [*local-pointer* (::local-pointer state)
+                 *react-component* (:rum/react-component state)
+                 *can-return-atom?* (volatile! true)]
+         (render-fn state))))
+   :will-unmount
+   (fn [state]
+     (remove-watch *state (::global-key state))
+     (when-let [*local @(::local-pointer state)]
+       (remove-watch *local ::local))
+     (dissoc state ::local-pointer))})
 
 (defmacro compset
   [rules]
