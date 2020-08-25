@@ -28,9 +28,7 @@
      [:what
       [::global ::clicks clicks]
       :then
-      (let [*local (r/local-state)]
-        (when-not @*local
-          (reset! *local 10))
+      (let [*local (r/atom 10)]
         [:div
          [:button {:on-click (fn [_]
                                (swap! *state click)
