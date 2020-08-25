@@ -1,9 +1,9 @@
 (require
   '[clojure.java.io :as io]
   '[clojure.string :as str]
-  '[cljs.build.api :as api]
   '[leiningen.core.project :as p :refer [defproject]]
-  '[leiningen.uberjar :refer [uberjar]])
+  '[leiningen.install :refer [install]]
+  '[leiningen.deploy :refer [deploy]])
 
 (defn read-project-clj []
   (p/ensure-dynamic-classloader)
@@ -44,21 +44,32 @@
       (delete-children-recursively! f2)))
   (when (.exists f) (io/delete-file f)))
 
-(def project (-> (read-project-clj)
-                 (merge (read-deps-edn []))
-                 p/init-project))
+(defmulti task first)
 
-(def out-file "resources/public/main.js")
-(def out-dir "resources/public/main.out")
+(defmethod task :default
+  [_]
+  (let [all-tasks  (-> task methods (dissoc :default) keys sort)
+        interposed (->> all-tasks (interpose ", ") (apply str))]
+    (println "Unknown or missing task. Choose one of:" interposed)
+    (System/exit 1)))
 
-(println "Building" out-file)
-(delete-children-recursively! (io/file out-dir))
-(api/build "src" {:main          'odoyle-frame.start
-                  :optimizations :advanced
-                  :output-to     out-file
-                  :output-dir    out-dir})
-(delete-children-recursively! (io/file out-dir))
+(defmethod task "install"
+  [_]
+  (-> (read-project-clj)
+      (merge (read-deps-edn []))
+      p/init-project
+      install)
+  (System/exit 0))
 
-(println "Building uberjar")
-(uberjar project)
-(System/exit 0)
+(defmethod task "deploy"
+  [_]
+  (-> (read-project-clj)
+      (merge (read-deps-edn []))
+      p/init-project
+      (deploy "clojars"))
+  (System/exit 0))
+
+;; entry point
+
+(task *command-line-args*)
+

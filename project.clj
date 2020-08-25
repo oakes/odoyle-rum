@@ -1,3 +1,7 @@
-(defproject odoyle-frame "0.1.0-SNAPSHOT"
-  :aot [odoyle-frame.start]
-  :main odoyle-frame.start)
+(defproject odoyle-rum "0.1.0-SNAPSHOT"
+  :description "Make Rum components with O'Doyle Rules"
+  :url "https://github.com/oakes/odoyle-rum"
+  :license {:name "Public Domain"
+            :url "http://unlicense.org/UNLICENSE"}
+  :repositories [["clojars" {:url "https://clojars.org/repo"
+                             :sign-releases false}]])

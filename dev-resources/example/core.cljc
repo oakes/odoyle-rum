@@ -1,4 +1,4 @@
-(ns odoyle-frame.core
+(ns example.core
   (:require [rum.core :as rum]
             [odoyle.rules :as o]
             [odoyle.rum :as orum]))

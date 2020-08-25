@@ -1,5 +1,5 @@
-(ns odoyle-frame.start-dev
-  (:require [odoyle-frame.start :as start]
+(ns example.start-dev
+  (:require [example.start :as start]
             [clojure.spec.test.alpha :as st]
             [ring.middleware.file :refer [wrap-file]]
             [clojure.java.io :as io]))

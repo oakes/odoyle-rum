@@ -1,11 +1,11 @@
-(ns odoyle-frame.start
+(ns example.start
   (:require [ring.adapter.jetty :refer [run-jetty]]
             [ring.middleware.resource :refer [wrap-resource]]
             [ring.middleware.content-type :refer [wrap-content-type]]
             [ring.util.response :refer [not-found]]
             [clojure.java.io :as io]
             [rum.core :as rum]
-            [odoyle-frame.core :as c]
+            [example.core :as c]
             [clojure.string :as str])
   (:gen-class))
 
