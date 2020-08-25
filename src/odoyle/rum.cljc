@@ -29,7 +29,7 @@
       *local)))
 
 (defn props []
-  (or *props* (throw (ex-info "You cannot call `props` here" {}))))
+  *props*)
 
 (defn reactive [*state]
   {:init
