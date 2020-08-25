@@ -20,7 +20,7 @@
      [:what
       [::global ::clicks clicks]]}))
 
-(declare *state)
+(declare *session)
 
 (def comps
   (orum/ruleset
@@ -32,7 +32,7 @@
             props (orum/props)]
         [:div
          [:button {:on-click (fn [_]
-                               (swap! *state click)
+                               (swap! *session click)
                                (swap! *local inc))}
           (str "Clicked " clicks " " (if (= 1 clicks) "time" "times"))]
          [:p (str "Local: " @*local)]
@@ -43,8 +43,9 @@
    (click-counter {:id 1})
    (click-counter {:id 2})])
 
-(def *state (-> (reduce o/add-rule (o/->session) (concat rules comps))
-                (o/insert ::global ::clicks 0)
-                o/fire-rules
-                atom))
+(def *session
+  (-> (reduce o/add-rule (o/->session) (concat rules comps))
+      (o/insert ::global ::clicks 0)
+      o/fire-rules
+      atom))
 
