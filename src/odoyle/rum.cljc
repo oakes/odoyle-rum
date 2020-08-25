@@ -55,16 +55,19 @@
 
 (defmacro ruleset
   [rules]
-  (reduce
-    (fn [v {:keys [rule-name fn-name conditions then-body when-body arg]}]
-      (conj v `(let [*state# (clojure.core/atom nil)]
-                 (rum/defc ~(-> rule-name name symbol) ~'< (reactive *state#) []
-                   (when-let [~arg @*state#]
-                     ~@then-body))
-                 (o/->Rule ~rule-name
-                           (mapv o/map->Condition '~conditions)
-                           (fn ~fn-name [arg#] (reset! *state# arg#))
-                           ~(when (some? when-body)
-                              `(fn [~arg] ~when-body))))))
-    []
-    (mapv #'o/->rule (#'o/parse ::o/rules rules))))
+  (->> (#'o/parse ::o/rules rules)
+       (mapv #'o/->rule)
+       (reduce
+         (fn [v {:keys [rule-name fn-name conditions then-body when-body arg]}]
+           (conj v `(let [*state# (clojure.core/atom nil)]
+                      (rum/defc ~(-> rule-name name symbol) ~'< (reactive *state#) []
+                        (when-let [~arg @*state#]
+                          ~@then-body))
+                      (o/->Rule ~rule-name
+                                (mapv o/map->Condition '~conditions)
+                                (fn ~fn-name [arg#] (reset! *state# arg#))
+                                ~(when (some? when-body)
+                                   `(fn [~arg] ~when-body))))))
+         [])
+       (list 'do
+         `(declare ~@(map #(-> % name symbol) (keys rules))))))
