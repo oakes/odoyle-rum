@@ -28,8 +28,15 @@
      [:what
       [::global ::clicks clicks]
       :then
-      [:button {:on-click #(swap! *state click)}
-       (str "Clicked " clicks " " (if (= 1 clicks) "time" "times"))]]}))
+      (let [*local (r/local-state)]
+        (when-not @*local
+          (reset! *local 10))
+        [:div
+         [:button {:on-click (fn [_]
+                               (swap! *state click)
+                               (swap! *local inc))}
+          (str "Clicked " clicks " " (if (= 1 clicks) "time" "times"))]
+         [:p (str "Local: " @*local)]])]}))
 
 (def *state (-> (reduce o/add-rule (o/->session) (concat rules comps))
                 (o/insert ::global ::clicks 0)
