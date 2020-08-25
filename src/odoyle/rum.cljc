@@ -3,9 +3,9 @@
             [rum.core :as rum])
   (:refer-clojure :exclude [atom]))
 
-(def ^:dynamic *local-pointer* nil)
-(def ^:dynamic *react-component* nil)
-(def ^:dynamic *can-return-atom?* nil)
+(def ^:private ^:dynamic *local-pointer* nil)
+(def ^:private ^:dynamic *react-component* nil)
+(def ^:private ^:dynamic *can-return-atom?* nil)
 
 #?(:clj (defn- random-uuid []
           (.toString (java.util.UUID/randomUUID))))
@@ -31,11 +31,11 @@
   (let [global-key (random-uuid)]
     {:init
      (fn [state props]
-       (when-let [comp (:rum/react-component state)]
+       (when-let [cmp (:rum/react-component state)]
          (add-watch *state global-key
                     (fn [_ _ p n]
                       (when (not= p n)
-                        (.forceUpdate comp)))))
+                        (.forceUpdate cmp)))))
        (assoc state ::local-pointer (clojure.core/atom nil)))
      :wrap-render
      (fn [render-fn]
