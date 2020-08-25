@@ -53,7 +53,7 @@
        (remove-watch *local ::local))
      (dissoc state ::local-pointer))})
 
-(defmacro compset
+(defmacro ruleset
   [rules]
   (reduce
     (fn [v {:keys [rule-name fn-name conditions then-body when-body arg]}]

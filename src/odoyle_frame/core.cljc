@@ -23,7 +23,7 @@
 (declare *state)
 
 (def comps
-  (orum/compset
+  (orum/ruleset
     {::click-counter
      [:what
       [::global ::clicks clicks]
