@@ -1,7 +1,7 @@
 (ns odoyle-frame.core
   (:require [rum.core :as rum]
             [odoyle.rules :as o]
-            [odoyle.rum :as r]))
+            [odoyle.rum :as orum]))
 
 (defn click [state]
   (-> state
@@ -23,18 +23,23 @@
 (declare *state)
 
 (def comps
-  (r/compset
-    {::app
+  (orum/compset
+    {::click-counter
      [:what
       [::global ::clicks clicks]
       :then
-      (let [*local (r/atom 10)]
+      (let [*local (orum/atom 10)]
         [:div
          [:button {:on-click (fn [_]
                                (swap! *state click)
                                (swap! *local inc))}
           (str "Clicked " clicks " " (if (= 1 clicks) "time" "times"))]
          [:p (str "Local: " @*local)]])]}))
+
+(rum/defc app []
+  [:div
+   (click-counter)
+   (click-counter)])
 
 (def *state (-> (reduce o/add-rule (o/->session) (concat rules comps))
                 (o/insert ::global ::clicks 0)

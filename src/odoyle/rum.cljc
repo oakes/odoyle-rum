@@ -7,9 +7,8 @@
 (def ^:dynamic *react-component* nil)
 (def ^:dynamic *can-return-atom?* nil)
 
-#?(:clj (defn rand-uuid []
-          (.toString (java.util.UUID/randomUUID)))
-   :cljs (def rand-uuid random-uuid))
+#?(:clj (defn- random-uuid []
+          (.toString (java.util.UUID/randomUUID))))
 
 (defn atom [initial-value]
   (cond
@@ -28,36 +27,36 @@
                        (.forceUpdate cmp)))))
       *local)))
 
+(defn reactive [*state]
+  (let [global-key (random-uuid)]
+    {:init
+     (fn [state props]
+       (when-let [comp (:rum/react-component state)]
+         (add-watch *state global-key
+                    (fn [_ _ p n]
+                      (when (not= p n)
+                        (.forceUpdate comp)))))
+       (assoc state ::local-pointer (clojure.core/atom nil)))
+     :wrap-render
+     (fn [render-fn]
+       (fn [state]
+         (binding [*local-pointer* (::local-pointer state)
+                   *react-component* (:rum/react-component state)
+                   *can-return-atom?* (volatile! true)]
+           (render-fn state))))
+     :will-unmount
+     (fn [state]
+       (remove-watch *state global-key)
+       (when-let [*local @(::local-pointer state)]
+         (remove-watch *local ::local))
+       (dissoc state ::local-pointer))}))
+
 (defmacro compset
   [rules]
   (reduce
     (fn [v {:keys [rule-name fn-name conditions then-body when-body arg]}]
-      (conj v `(let [*state# (clojure.core/atom nil)
-                     global-key# (rand-uuid)]
-                 (rum/defc ~(-> rule-name name symbol)
-                   ~'<
-                   {:init
-                    (fn [state# props#]
-                      (when-let [comp# (:rum/react-component state#)]
-                        (add-watch *state# global-key#
-                                   (fn [_# _# p# n#]
-                                     (when (not= p# n#)
-                                       (.forceUpdate comp#)))))
-                      (assoc state# ::local-pointer (clojure.core/atom nil)))
-                    :wrap-render
-                    (fn [render-fn#]
-                      (fn [state#]
-                        (binding [*local-pointer* (::local-pointer state#)
-                                  *react-component* (:rum/react-component state#)
-                                  *can-return-atom?* (volatile! true)]
-                          (render-fn# state#))))
-                    :will-unmount
-                    (fn [state#]
-                      (remove-watch *state# global-key#)
-                      (when-let [*local# @(::local-pointer state#)]
-                        (remove-watch *local# ::local))
-                      (dissoc state# ::local-pointer))}
-                   []
+      (conj v `(let [*state# (clojure.core/atom nil)]
+                 (rum/defc ~(-> rule-name name symbol) ~'< (reactive *state#) []
                    (when-let [~arg @*state#]
                      ~@then-body))
                  (o/->Rule ~rule-name
