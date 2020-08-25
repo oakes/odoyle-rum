@@ -12,21 +12,21 @@
    :cljs (def rand-uuid random-uuid))
 
 (defn atom [initial-value]
-  (if-not *local-pointer*
+  (cond
+    (nil? *local-pointer*)
     (throw (ex-info "You cannot create an atom here" {}))
-    (if-not @*can-return-atom?*
-      (throw (ex-info "You can only call `atom` once in each :then block" {}))
-      (do
-        (vreset! *can-return-atom?* false)
-        (if-let [*local @*local-pointer*]
-          *local
-          (let [*local (reset! *local-pointer* (clojure.core/atom initial-value))]
-            (when-let [cmp *react-component*]
-              (add-watch *local ::local
-                         (fn [_ _ p n]
-                           (when (not= p n)
-                             (.forceUpdate cmp)))))
-            *local))))))
+    (nil? @*can-return-atom?*)
+    (throw (ex-info "You can only call `atom` once in each :then block" {})))
+  (vreset! *can-return-atom?* false)
+  (if-let [*local @*local-pointer*]
+    *local
+    (let [*local (reset! *local-pointer* (clojure.core/atom initial-value))]
+      (when-let [cmp *react-component*]
+        (add-watch *local ::local
+                   (fn [_ _ p n]
+                     (when (not= p n)
+                       (.forceUpdate cmp)))))
+      *local)))
 
 (defmacro compset
   [rules]
