@@ -6,6 +6,7 @@
 (def ^:private ^:dynamic *local-pointer* nil)
 (def ^:private ^:dynamic *react-component* nil)
 (def ^:private ^:dynamic *can-return-atom?* nil)
+(def ^:private ^:dynamic *props* nil)
 
 #?(:clj (defn- random-uuid []
           (.toString (java.util.UUID/randomUUID))))
@@ -27,6 +28,9 @@
                        (.forceUpdate cmp)))))
       *local)))
 
+(defn props []
+  (or *props* (throw (ex-info "You cannot call `props` here" {}))))
+
 (defn reactive [*state]
   {:init
    (fn [state props]
@@ -44,7 +48,8 @@
      (fn [state]
        (binding [*local-pointer* (::local-pointer state)
                  *react-component* (:rum/react-component state)
-                 *can-return-atom?* (volatile! true)]
+                 *can-return-atom?* (volatile! true)
+                 *props* (first (:rum/args state))]
          (render-fn state))))
    :will-unmount
    (fn [state]
@@ -60,7 +65,7 @@
        (reduce
          (fn [v {:keys [rule-name fn-name conditions then-body when-body arg]}]
            (conj v `(let [*state# (clojure.core/atom nil)]
-                      (rum/defc ~(-> rule-name name symbol) ~'< (reactive *state#) []
+                      (rum/defc ~(-> rule-name name symbol) ~'< (reactive *state#) [props#]
                         (when-let [~arg @*state#]
                           ~@then-body))
                       (o/->Rule ~rule-name

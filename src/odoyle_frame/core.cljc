@@ -28,18 +28,20 @@
      [:what
       [::global ::clicks clicks]
       :then
-      (let [*local (orum/atom 10)]
+      (let [*local (orum/atom 10)
+            props (orum/props)]
         [:div
          [:button {:on-click (fn [_]
                                (swap! *state click)
                                (swap! *local inc))}
           (str "Clicked " clicks " " (if (= 1 clicks) "time" "times"))]
-         [:p (str "Local: " @*local)]])]}))
+         [:p (str "Local: " @*local)]
+         [:p (str "Props: " props)]])]}))
 
 (rum/defc app []
   [:div
-   (click-counter)
-   (click-counter)])
+   (click-counter {:id 1})
+   (click-counter {:id 2})])
 
 (def *state (-> (reduce o/add-rule (o/->session) (concat rules comps))
                 (o/insert ::global ::clicks 0)
