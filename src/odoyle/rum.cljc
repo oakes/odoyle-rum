@@ -60,8 +60,8 @@
 
 (defmacro ruleset
   [rules]
-  (->> (#'o/parse ::o/rules rules)
-       (mapv #'o/->rule)
+  (->> (o/parse ::o/rules rules)
+       (mapv o/->rule)
        (reduce
          (fn [v {:keys [rule-name fn-name conditions then-body when-body arg]}]
            (conj v `(let [*state# (clojure.core/atom nil)]
