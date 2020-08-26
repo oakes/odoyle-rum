@@ -12,7 +12,10 @@
 #?(:clj (defn- random-uuid []
           (.toString (java.util.UUID/randomUUID))))
 
-(defn atom [initial-value]
+(defn atom
+  "Returns an atom that can hold local state for a component.
+  Only works in a :then block."
+  [initial-value]
   (cond
     (nil? *local-pointer*)
     (throw (ex-info "You cannot create an atom here" {}))
@@ -29,10 +32,15 @@
                        (.forceUpdate cmp)))))
       *local)))
 
-(defn prop []
+(defn prop
+  "Returns the prop sent to the component. Only works in a :then block."
+  []
   *prop*)
 
-(defn reactive [*state]
+(defn reactive
+  "A rum mixin that makes the associated component react to changes from
+  the session and the local atom."
+  [*state]
   {:init
    (fn [state props]
      (let [global-key (random-uuid)]
@@ -62,6 +70,7 @@
 (s/def ::rules (s/map-of simple-symbol? ::o/rule))
 
 (defmacro ruleset
+  "Returns a vector of components after transforming the given map."
   [rules]
   (->> (o/parse ::rules rules)
        (mapv o/->rule)
