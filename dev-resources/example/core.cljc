@@ -22,7 +22,7 @@
 
 (declare *session)
 
-(def comps
+(def components
   (orum/ruleset
     {click-counter
      [:what
@@ -44,7 +44,7 @@
    (click-counter {:id 2})])
 
 (def *session
-  (-> (reduce o/add-rule (o/->session) (concat rules comps))
+  (-> (reduce o/add-rule (o/->session) (concat rules components))
       (o/insert ::global ::clicks 0)
       o/fire-rules
       atom))
