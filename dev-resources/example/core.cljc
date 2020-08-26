@@ -29,14 +29,14 @@
       [::global ::clicks clicks]
       :then
       (let [*local (orum/atom 10)
-            props (orum/props)]
+            prop (orum/prop)]
         [:div
          [:button {:on-click (fn [_]
                                (swap! *session click)
                                (swap! *local inc))}
           (str "Clicked " clicks " " (if (= 1 clicks) "time" "times"))]
          [:p (str "Local: " @*local)]
-         [:p (str "Props: " props)]])]}))
+         [:p (str "Prop: " prop)]])]}))
 
 (rum/defc app []
   [:div
