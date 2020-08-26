@@ -1,6 +1,7 @@
 (ns odoyle.rum
   (:require [odoyle.rules :as o]
-            [rum.core :as rum])
+            [rum.core :as rum]
+            [clojure.spec.alpha :as s])
   (:refer-clojure :exclude [atom]))
 
 (def ^:private ^:dynamic *local-pointer* nil)
@@ -58,9 +59,11 @@
        (remove-watch *local ::local))
      (dissoc state ::local-pointer))})
 
+(s/def ::rules (s/map-of simple-symbol? ::o/rule))
+
 (defmacro ruleset
   [rules]
-  (->> (o/parse ::o/rules rules)
+  (->> (o/parse ::rules rules)
        (mapv o/->rule)
        (reduce
          (fn [v {:keys [rule-name fn-name conditions then-body when-body arg]}]

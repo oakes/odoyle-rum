@@ -24,7 +24,7 @@
 
 (def comps
   (orum/ruleset
-    {::click-counter
+    {click-counter
      [:what
       [::global ::clicks clicks]
       :then
