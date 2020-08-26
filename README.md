@@ -26,7 +26,7 @@ Here's a button that displays how many times it's been clicked:
                             (swap! *session
                               (fn [session]
                                 (-> session
-                                    (o/insert ::clicks (inc clicks))
+                                    (o/insert ::global ::clicks (inc clicks))
                                     o/fire-rules))))}
        (str "Clicked " clicks " " (if (= 1 clicks) "time" "times"))]]}))
 
@@ -36,10 +36,7 @@ Here's a button that displays how many times it's been clicked:
       o/fire-rules
       atom))
 
-(rum/defc app []
-  (click-counter {}))
-
-(rum/mount (app) (js/document.querySelector "#app"))
+(rum/mount (click-counter {}) (js/document.querySelector "#app"))
 ```
 
 The `click-counter` rule generates a var holding a valid Rum component. When the values in the `:what` block are updated, the rule re-fires, which causes the component to update.
