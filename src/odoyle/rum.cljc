@@ -78,8 +78,10 @@
          (fn [v {:keys [rule-name fn-name conditions then-body when-body arg]}]
            (conj v `(let [*state# (clojure.core/atom nil)]
                       (rum/defc ~(-> rule-name name symbol) ~'< (reactive *state#) [prop#]
-                        (when-let [~arg @*state#]
-                          ~@then-body))
+                        (when-let [state# @*state#]
+                          (binding [o/*match* state#]
+                            (let [~arg state#]
+                              ~@then-body))))
                       (o/->Rule ~rule-name
                                 (mapv o/map->Condition '~conditions)
                                 (fn ~fn-name [arg#] (reset! *state# arg#))
