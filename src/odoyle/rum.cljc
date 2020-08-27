@@ -1,8 +1,7 @@
 (ns odoyle.rum
   (:require [odoyle.rules :as o]
             [rum.core :as rum]
-            [clojure.spec.alpha :as s]
-            [clojure.string :as str])
+            [clojure.spec.alpha :as s])
   (:refer-clojure :exclude [atom]))
 
 (def ^:private ^:dynamic *local-pointer* nil)
@@ -78,17 +77,10 @@
        (reduce
          (fn [v {:keys [rule-name conditions then-body when-body arg]}]
            (let [;; the rule name is a simple symbol,
-                 ;; so create a qualified keyword to use as the rule name
+                 ;; so create a qualified keyword to use as the rule name.
                  ;; this is necessary so rules with the same name can be
-                 ;; created in different namespaces
-                 ns-str (str *ns*)
-                 rule-str (name rule-name)
-                 rule-key (keyword ns-str rule-str)
-                 ;; create a name for the anonymous function
-                 ;; so stack traces will be easier to read
-                 fn-name (-> (str ns-str "-" rule-str)
-                             (str/replace "." "-")
-                             symbol)]
+                 ;; created in different namespaces.
+                 rule-key (keyword (str *ns*) (name rule-name))]
              (conj v `(let [*state# (clojure.core/atom nil)]
                         (rum/defc ~(-> rule-name name symbol) ~'< (reactive *state#) [prop#]
                           (when-let [state# @*state#]
@@ -97,7 +89,7 @@
                                 ~@then-body))))
                         (o/->Rule ~rule-key
                                   (mapv o/map->Condition '~conditions)
-                                  (fn ~fn-name [arg#] (reset! *state# arg#))
+                                  (fn [arg#] (reset! *state# arg#))
                                   ~(when (some? when-body)
                                      `(fn [~arg] ~when-body)))))))
          [])
