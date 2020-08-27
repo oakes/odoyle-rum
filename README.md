@@ -14,21 +14,20 @@ Here's a button that displays how many times it's been clicked:
   '[odoyle.rules :as o]
   '[odoyle.rum :as orum])
 
-(declare *session)
-
 (def components
   (orum/ruleset
     {click-counter
      [:what
       [::global ::clicks clicks]
       :then
-      [:button {:on-click (fn [_]
-                            (swap! *session
-                              (fn [session]
-                                (-> session
-                                    (o/insert ::global ::clicks (inc clicks))
-                                    o/fire-rules))))}
-       (str "Clicked " clicks " " (if (= 1 clicks) "time" "times"))]]}))
+      (let [*session (orum/prop)]
+        [:button {:on-click (fn [_]
+                              (swap! *session
+                                (fn [session]
+                                  (-> session
+                                      (o/insert ::global ::clicks (inc clicks))
+                                      o/fire-rules))))}
+         (str "Clicked " clicks " " (if (= 1 clicks) "time" "times"))])]}))
 
 (def *session
   (-> (reduce o/add-rule (o/->session) components)
@@ -36,7 +35,7 @@ Here's a button that displays how many times it's been clicked:
       o/fire-rules
       atom))
 
-(rum/mount (click-counter {}) (js/document.querySelector "#app"))
+(rum/mount (click-counter *session) (js/document.querySelector "#app"))
 ```
 
 The `click-counter` rule generates a var holding a valid Rum component. When the values in the `:what` block are updated, the rule re-fires, which causes the component to update.
