@@ -71,7 +71,7 @@
 (s/def ::rules (s/map-of simple-symbol? ::o/rule))
 
 (defmacro ruleset
-  "Returns a vector of components after transforming the given map."
+  "Returns a vector of component rules after transforming the given map."
   [rules]
   (->> (o/parse ::rules rules)
        (mapv o/->rule)
