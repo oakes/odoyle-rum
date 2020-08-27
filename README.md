@@ -1,3 +1,5 @@
+[![Clojars Project](https://img.shields.io/clojars/v/net.sekao/odoyle-rum.svg)](https://clojars.org/net.sekao/odoyle-rum)
+
 This is an 🌠experimental🌠 project. The shootings stars are for emphasis.
 
 What if we used a rules engine to manage all the state of a frontend UI? Can a rules engine replace [reframe](https://github.com/Day8/re-frame)? Let's find out, children!
