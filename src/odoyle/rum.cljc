@@ -17,9 +17,9 @@
   Only works in a :then block."
   [initial-value]
   (cond
-    (nil? *local-pointer*)
+    (not *local-pointer*)
     (throw (ex-info "You cannot create an atom here" {}))
-    (nil? @*can-return-atom?*)
+    (not @*can-return-atom?*)
     (throw (ex-info "You can only call `atom` once in each :then block" {})))
   (vreset! *can-return-atom?* false)
   (if-let [*local @*local-pointer*]
