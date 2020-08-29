@@ -16,10 +16,9 @@
   "Returns an atom that can hold local state for a component.
   Only works in a :then block."
   [initial-value]
-  (cond
-    (not *local-pointer*)
-    (throw (ex-info "You cannot call `atom` here" {}))
-    (not @*can-return-atom?*)
+  (when-not *local-pointer*
+    (throw (ex-info "You cannot call `atom` here" {})))
+  (when-not @*can-return-atom?*
     (throw (ex-info "You can only call `atom` once in each :then block" {})))
   (vreset! *can-return-atom?* false)
   (if-let [*local @*local-pointer*]
