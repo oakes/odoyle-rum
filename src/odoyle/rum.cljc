@@ -18,7 +18,7 @@
   [initial-value]
   (cond
     (not *local-pointer*)
-    (throw (ex-info "You cannot create an atom here" {}))
+    (throw (ex-info "You cannot call `atom` here" {}))
     (not @*can-return-atom?*)
     (throw (ex-info "You can only call `atom` once in each :then block" {})))
   (vreset! *can-return-atom?* false)
@@ -35,6 +35,8 @@
 (defn prop
   "Returns the prop sent to the component. Only works in a :then block."
   []
+  (when-not *local-pointer*
+    (throw (ex-info "You cannot call `prop` here" {})))
   *prop*)
 
 (defn reactive
