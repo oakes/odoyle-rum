@@ -84,10 +84,11 @@
                  rule-key (keyword (str *ns*) (name rule-name))]
              (conj v `(let [*state# (clojure.core/atom nil)]
                         (rum/defc ~rule-name ~'< (reactive *state#) [prop#]
-                          (when-let [state# @*state#]
+                          (if-let [state# @*state#]
                             (binding [o/*match* state#]
                               (let [~arg state#]
-                                ~@then-body))))
+                                ~@then-body))
+                            (throw (ex-info (str ~(str rule-name) " cannot render because it doesn't have a complete match") {}))))
                         (o/->Rule ~rule-key
                                   (mapv o/map->Condition '~conditions)
                                   (fn [arg#] (reset! *state# arg#))
