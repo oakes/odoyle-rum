@@ -83,7 +83,7 @@
                  ;; created in different namespaces.
                  rule-key (keyword (str *ns*) (name rule-name))]
              (conj v `(let [*state# (clojure.core/atom nil)]
-                        (rum/defc ~(-> rule-name name symbol) ~'< (reactive *state#) [prop#]
+                        (rum/defc ~rule-name ~'< (reactive *state#) [prop#]
                           (when-let [state# @*state#]
                             (binding [o/*match* state#]
                               (let [~arg state#]
