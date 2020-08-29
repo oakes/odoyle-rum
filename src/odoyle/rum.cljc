@@ -88,7 +88,7 @@
                             (binding [o/*match* state#]
                               (let [~arg state#]
                                 ~@then-body))
-                            (throw (ex-info (str ~(str rule-name) " cannot render because it doesn't have a complete match") {}))))
+                            (throw (ex-info (str ~(-> rule-key symbol str) " cannot render because it doesn't have a complete match") {}))))
                         (o/->Rule ~rule-key
                                   (mapv o/map->Condition '~conditions)
                                   (fn [arg#] (reset! *state# arg#))
