@@ -71,10 +71,9 @@
 ;; the specs for the ruleset macro are mostly the same as odoyle.rules/ruleset, except:
 ;; 1. they keys are symbols, not keywords
 ;; 2. in the what block, only values can have bindings
-;; 3. in the what block, {:then false} can't be used
-;; 4. :when blocks aren't allowed
+;; 3. :when blocks aren't allowed
 (s/def ::what-id (s/or :value ::o/id))
-(s/def ::what-tuple (s/cat :id ::what-id, :attr ::o/what-attr, :value ::o/what-value))
+(s/def ::what-tuple (s/cat :id ::what-id, :attr ::o/what-attr, :value ::o/what-value, :opts (s/? ::o/what-opts)))
 (s/def ::what-block (s/cat :header #{:what} :body (s/+ (s/spec ::what-tuple))))
 (s/def ::rule (s/cat
                 :what-block ::what-block
@@ -92,14 +91,20 @@
                  ;; so create a qualified keyword to use as the rule name.
                  ;; this is necessary so rules with the same name can be
                  ;; created in different namespaces.
-                 rule-key (keyword (str *ns*) (name rule-name))]
+                 rule-key (keyword (str *ns*) (name rule-name))
+                 rule-str (-> rule-key symbol str)
+                 invalid-options #{:then}]
+             (when-let[opt-name (some (fn [condition]
+                                        (some invalid-options (-> condition :opts keys)))
+                                      conditions)]
+               (throw (ex-info (str rule-str " may not use the " opt-name " option") {})))
              (conj v `(let [*state# (clojure.core/atom nil)]
                         (rum/defc ~rule-name ~'< (reactive *state#) [prop#]
                           (if-let [state# @*state#]
                             (binding [o/*match* state#]
                               (let [~arg state#]
                                 ~@then-body))
-                            (throw (ex-info (str ~(-> rule-key symbol str) " cannot render because it doesn't have a complete match") {}))))
+                            (throw (ex-info (str ~rule-str " cannot render because it doesn't have a complete match") {}))))
                         (o/->Rule ~rule-key
                                   (mapv o/map->Condition '~conditions)
                                   (fn [arg#] (reset! *state# arg#))
