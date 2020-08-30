@@ -68,7 +68,18 @@
        (remove-watch *local ::local))
      (dissoc state ::local-pointer))})
 
-(s/def ::rules (s/map-of simple-symbol? ::o/rule))
+;; the specs for the ruleset macro are mostly the same as odoyle.rules/ruleset, except:
+;; 1. they keys are symbols, not keywords
+;; 2. in the what block, only values can have bindings
+;; 3. in the what block, {:then false} can't be used
+;; 4. :when blocks aren't allowed
+(s/def ::what-id (s/or :value ::o/id))
+(s/def ::what-tuple (s/cat :id ::what-id, :attr ::o/what-attr, :value ::o/what-value))
+(s/def ::what-block (s/cat :header #{:what} :body (s/+ (s/spec ::what-tuple))))
+(s/def ::rule (s/cat
+                :what-block ::what-block
+                :then-block (s/? ::o/then-block)))
+(s/def ::rules (s/map-of simple-symbol? ::rule))
 
 (defmacro ruleset
   "Returns a vector of component rules after transforming the given map."
