@@ -72,12 +72,13 @@
 ;; 1. they keys are symbols, not keywords
 ;; 2. in the what block, only values can have bindings
 ;; 3. :when blocks aren't allowed
+;; 4. :then blocks are required
 (s/def ::what-id (s/or :value ::o/id))
 (s/def ::what-tuple (s/cat :id ::what-id, :attr ::o/what-attr, :value ::o/what-value, :opts (s/? ::o/what-opts)))
 (s/def ::what-block (s/cat :header #{:what} :body (s/+ (s/spec ::what-tuple))))
 (s/def ::rule (s/cat
                 :what-block ::what-block
-                :then-block (s/? ::o/then-block)))
+                :then-block ::o/then-block))
 (s/def ::rules (s/map-of simple-symbol? ::rule))
 
 (defmacro ruleset
