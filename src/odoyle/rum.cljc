@@ -96,4 +96,4 @@
                                      `(fn [~arg] ~when-body)))))))
          [])
        (list 'do
-         `(declare ~@(map #(-> % name symbol) (keys rules))))))
+         `(declare ~@(keys rules)))))
