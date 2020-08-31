@@ -8,6 +8,15 @@
 (def ^:private ^:dynamic *react-component* nil)
 (def ^:private ^:dynamic *can-return-atom?* nil)
 (def ^:private ^:dynamic *prop* nil)
+(def ^{:dynamic true
+       :doc "If bound to an volatile containing a hash map,
+            matches triggered by `fire-rules` will be stored in it
+            rather than in the atom created by `ruleset`.
+            This is important when modifying the session in a server-side
+            route because it ensures the modifications will be local
+            and will not affect other connections happening simultaneously.
+            Do not use it from clojurescript."}
+  *matches* nil)
 
 (defn atom
   "Returns an atom that can hold local state for a component.
@@ -38,7 +47,7 @@
 (defn reactive
   "A rum mixin that makes the associated component react to changes from
   the session and the local atom."
-  [*match]
+  [rule-key *match]
   {:init
    (fn [state props]
      (-> state
@@ -58,7 +67,9 @@
                  *react-component* (:rum/react-component state)
                  *can-return-atom?* (volatile! true)
                  *prop* (first (:rum/args state))
-                 o/*match* @*match]
+                 o/*match* #?(:cljs @*match
+                              :clj (or (some-> *matches* deref rule-key)
+                                       @*match))]
          (render-fn state))))
    :will-unmount
    (fn [state]
@@ -103,7 +114,7 @@
                (throw (ex-info (str rule-str " may not use the " opt-name " option") {})))
              ;; generate the rum component and Rule record
              (conj v `(let [*match# (clojure.core/atom nil)]
-                        (rum/defc ~rule-name ~'< (reactive *match#) [prop#]
+                        (rum/defc ~rule-name ~'< (reactive ~rule-key *match#) [prop#]
                           ;; throw if the rule has a :what block but no complete match
                           (when (and ~has-conditions? (not o/*match*))
                             (throw (ex-info (str ~rule-str " cannot render because the :what block doesn't have a complete match yet") {})))
@@ -113,7 +124,9 @@
                         (o/->Rule ~rule-key
                                   (mapv o/map->Condition '~conditions)
                                   (fn [arg#]
-                                    (reset! *match# arg#))
+                                    (if *matches*
+                                      (vswap! *matches* assoc ~rule-key arg#)
+                                      (reset! *match# arg#)))
                                   nil)))))
          [])
        (list 'do
