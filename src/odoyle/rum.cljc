@@ -9,9 +9,6 @@
 (def ^:private ^:dynamic *can-return-atom?* nil)
 (def ^:private ^:dynamic *prop* nil)
 
-#?(:clj (defn- random-uuid []
-          (.toString (java.util.UUID/randomUUID))))
-
 (defn atom
   "Returns an atom that can hold local state for a component.
   Only works in a :then block."
@@ -44,15 +41,16 @@
   [*state]
   {:init
    (fn [state props]
-     (let [global-key (random-uuid)]
-       (when-let [cmp (:rum/react-component state)]
-         (add-watch *state global-key
-                    (fn [_ _ p n]
-                      (when (not= p n)
-                        (.forceUpdate cmp)))))
-       (assoc state
-         ::local-pointer (clojure.core/atom nil)
-         ::global-key global-key)))
+     (-> state
+         (assoc ::local-pointer (clojure.core/atom nil))
+         #?(:cljs (assoc ::global-key
+                         (let [global-key (random-uuid)
+                               cmp (:rum/react-component state)]
+                           (add-watch *state global-key
+                                      (fn [_ _ p n]
+                                        (when (not= p n)
+                                          (.forceUpdate cmp))))
+                           global-key)))))
    :wrap-render
    (fn [render-fn]
      (fn [state]
@@ -63,7 +61,7 @@
          (render-fn state))))
    :will-unmount
    (fn [state]
-     (remove-watch *state (::global-key state))
+     #?(:cljs (remove-watch *state (::global-key state)))
      (when-let [*local @(::local-pointer state)]
        (remove-watch *local ::local))
      (dissoc state ::local-pointer))})
