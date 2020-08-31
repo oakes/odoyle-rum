@@ -57,7 +57,8 @@
        (binding [*local-pointer* (::local-pointer state)
                  *react-component* (:rum/react-component state)
                  *can-return-atom?* (volatile! true)
-                 *prop* (first (:rum/args state))]
+                 *prop* (first (:rum/args state))
+                 o/*match* @*state]
          (render-fn state))))
    :will-unmount
    (fn [state]
@@ -103,17 +104,16 @@
              ;; generate the rum component and Rule record
              (conj v `(let [*state# (clojure.core/atom nil)]
                         (rum/defc ~rule-name ~'< (reactive *state#) [prop#]
-                          (let [state# @*state#]
-                            ;; throw if the rule has a :what block but no complete match
-                            (when (and ~has-conditions? (not state#))
-                              (throw (ex-info (str ~rule-str " cannot render because the :what block doesn't have a complete match yet") {})))
-                            ;; return the body of the component
-                            (binding [o/*match* state#]
-                              (let [~arg state#]
-                                ~@then-body))))
+                          ;; throw if the rule has a :what block but no complete match
+                          (when (and ~has-conditions? (not o/*match*))
+                            (throw (ex-info (str ~rule-str " cannot render because the :what block doesn't have a complete match yet") {})))
+                          ;; return the body of the component
+                            (let [~arg o/*match*]
+                              ~@then-body))
                         (o/->Rule ~rule-key
                                   (mapv o/map->Condition '~conditions)
-                                  (fn [arg#] (reset! *state# arg#))
+                                  (fn [arg#]
+                                    (reset! *state# arg#))
                                   nil)))))
          [])
        (list 'do
