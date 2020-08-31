@@ -9,7 +9,7 @@
 (def ^:private ^:dynamic *can-return-atom?* nil)
 (def ^:private ^:dynamic *prop* nil)
 (def ^{:dynamic true
-       :doc "If bound to an volatile containing a hash map,
+       :doc "If bound to a volatile containing a hash map,
             matches triggered by `fire-rules` will be stored in it
             rather than in the atom created by `ruleset`.
             This is important when modifying the session in a server-side
@@ -79,7 +79,7 @@
      (dissoc state ::local-pointer))})
 
 ;; the specs for the ruleset macro are mostly the same as odoyle.rules/ruleset, except:
-;; 1. they keys are symbols, not keywords
+;; 1. the keys are symbols, not keywords
 ;; 2. :what blocks are optional
 ;; 3. in the :what block, only values can have bindings
 ;; 4. :when blocks aren't allowed
@@ -119,8 +119,8 @@
                           (when (and ~has-conditions? (not o/*match*))
                             (throw (ex-info (str ~rule-str " cannot render because the :what block doesn't have a complete match yet") {})))
                           ;; return the body of the component
-                            (let [~arg o/*match*]
-                              ~@then-body))
+                          (let [~arg o/*match*]
+                            ~@then-body))
                         (o/->Rule ~rule-key
                                   (mapv o/map->Condition '~conditions)
                                   (fn [arg#]
