@@ -38,7 +38,7 @@
 (defn reactive
   "A rum mixin that makes the associated component react to changes from
   the session and the local atom."
-  [*state]
+  [*match]
   {:init
    (fn [state props]
      (-> state
@@ -46,7 +46,7 @@
          #?(:cljs (assoc ::global-key
                          (let [global-key (random-uuid)
                                cmp (:rum/react-component state)]
-                           (add-watch *state global-key
+                           (add-watch *match global-key
                                       (fn [_ _ p n]
                                         (when (not= p n)
                                           (.forceUpdate cmp))))
@@ -58,11 +58,11 @@
                  *react-component* (:rum/react-component state)
                  *can-return-atom?* (volatile! true)
                  *prop* (first (:rum/args state))
-                 o/*match* @*state]
+                 o/*match* @*match]
          (render-fn state))))
    :will-unmount
    (fn [state]
-     #?(:cljs (remove-watch *state (::global-key state)))
+     #?(:cljs (remove-watch *match (::global-key state)))
      (when-let [*local @(::local-pointer state)]
        (remove-watch *local ::local))
      (dissoc state ::local-pointer))})
@@ -102,8 +102,8 @@
                                        conditions)]
                (throw (ex-info (str rule-str " may not use the " opt-name " option") {})))
              ;; generate the rum component and Rule record
-             (conj v `(let [*state# (clojure.core/atom nil)]
-                        (rum/defc ~rule-name ~'< (reactive *state#) [prop#]
+             (conj v `(let [*match# (clojure.core/atom nil)]
+                        (rum/defc ~rule-name ~'< (reactive *match#) [prop#]
                           ;; throw if the rule has a :what block but no complete match
                           (when (and ~has-conditions? (not o/*match*))
                             (throw (ex-info (str ~rule-str " cannot render because the :what block doesn't have a complete match yet") {})))
@@ -113,7 +113,7 @@
                         (o/->Rule ~rule-key
                                   (mapv o/map->Condition '~conditions)
                                   (fn [arg#]
-                                    (reset! *state# arg#))
+                                    (reset! *match# arg#))
                                   nil)))))
          [])
        (list 'do
