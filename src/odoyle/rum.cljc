@@ -88,7 +88,7 @@
   (->> (o/parse ::rules rules)
        (mapv o/->rule)
        (reduce
-         (fn [v {:keys [rule-name conditions then-body when-body arg]}]
+         (fn [v {:keys [rule-name conditions then-body arg]}]
            (let [;; the rule name is a simple symbol,
                  ;; so create a qualified keyword to use as the rule name.
                  ;; this is necessary so rules with the same name can be
@@ -116,8 +116,7 @@
                         (o/->Rule ~rule-key
                                   (mapv o/map->Condition '~conditions)
                                   (fn [arg#] (reset! *state# arg#))
-                                  ~(when (some? when-body)
-                                     `(fn [~arg] ~when-body)))))))
+                                  nil)))))
          [])
        (list 'do
          `(declare ~@(keys rules)))))
