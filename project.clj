@@ -1,4 +1,4 @@
-(defproject net.sekao/odoyle-rum "0.4.4-SNAPSHOT"
+(defproject net.sekao/odoyle-rum "0.5.0"
   :description "Make Rum components with O'Doyle Rules"
   :url "https://github.com/oakes/odoyle-rum"
   :license {:name "Public Domain"
