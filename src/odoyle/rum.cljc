@@ -84,8 +84,9 @@
 ;; 3. in the :what block, only values can have bindings
 ;; 4. :when blocks aren't allowed
 ;; 5. :then blocks are required
-(s/def ::what-id (s/or :value ::o/id))
-(s/def ::what-tuple (s/cat :id ::what-id, :attr ::o/what-attr, :value ::o/what-value, :opts (s/? ::o/what-opts)))
+(s/def ::what-id (s/or :value (s/and ::o/id #(not (symbol? %)))))
+(s/def ::what-value (s/or :binding symbol?))
+(s/def ::what-tuple (s/cat :id ::what-id, :attr ::o/what-attr, :value ::what-value, :opts (s/? ::o/what-opts)))
 (s/def ::what-block (s/cat :header #{:what} :body (s/+ (s/spec ::what-tuple))))
 (s/def ::rule (s/cat
                 :what-block (s/? ::what-block)
@@ -123,6 +124,7 @@
                             ~@then-body))
                         (o/->Rule ~rule-key
                                   (mapv o/map->Condition '~conditions)
+                                  nil
                                   (fn [arg#]
                                     (if *matches*
                                       (vswap! *matches* assoc ~rule-key arg#)
