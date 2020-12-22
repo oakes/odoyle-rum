@@ -1,10 +1,10 @@
 {:paths ["src"]
  :deps {net.sekao/odoyle-rules {:mvn/version "0.6.0"}
-        rum {:mvn/version "0.11.4"}}
+        rum/rum {:mvn/version "0.11.4"}}
  :aliases {:dev {:extra-deps {org.clojure/clojurescript {:mvn/version "1.10.764"}
                               com.bhauman/figwheel-main {:mvn/version "0.2.11"}
-                              ring {:mvn/version "1.8.1"}}
+                              ring/ring {:mvn/version "1.8.1"}}
                  :main-opts ["dev.clj"]
                  :extra-paths ["dev-resources"]}
-           :prod {:extra-deps {leiningen {:mvn/version "2.9.0"}}
+           :prod {:extra-deps {leiningen/leiningen {:mvn/version "2.9.0"}}
                   :main-opts ["prod.clj"]}}}
