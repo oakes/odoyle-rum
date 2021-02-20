@@ -2,6 +2,7 @@
   (:require [odoyle.rules :as o]
             [rum.core :as rum]
             [clojure.spec.alpha :as s])
+  #?(:cljs (:require-macros [odoyle.rum :refer [ruleset]]))
   (:refer-clojure :exclude [atom]))
 
 (def ^:private ^:dynamic *local-pointer* nil)
@@ -93,6 +94,7 @@
                 :then-block ::o/then-block))
 (s/def ::rules (s/map-of simple-symbol? ::rule))
 
+#?(:clj
 (defmacro ruleset
   "Returns a vector of component rules after transforming the given map."
   [rules]
@@ -132,4 +134,4 @@
                                   nil)))))
          [])
        (list 'do
-         `(declare ~@(keys rules)))))
+         `(declare ~@(keys rules))))))

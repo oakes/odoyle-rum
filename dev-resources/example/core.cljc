@@ -1,9 +1,7 @@
 (ns example.core
   (:require [rum.core :as rum]
             [odoyle.rules :as o]
-            [odoyle.rum :as orum])
-  #?(:cljs (:require-macros [odoyle.rules]
-                            [odoyle.rum])))
+            [odoyle.rum :as orum]))
 
 (defn click [state]
   (-> state
