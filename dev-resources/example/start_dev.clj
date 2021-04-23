@@ -6,6 +6,7 @@
 
 (defn -main []
   (st/instrument)
+  (st/unstrument 'odoyle.rules/insert) ;; don't require specs for attributes
   (.mkdirs (io/file "target" "public"))
   (-> start/handler
       (wrap-file "target/public")
