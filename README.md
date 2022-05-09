@@ -34,12 +34,20 @@ I'm using [Rum](https://github.com/tonsky/rum) as my React wrapper, because it i
                                       (o/insert ::global ::clicks (inc clicks))
                                       o/fire-rules))))}
          (str "Clicked " clicks " " (if (= 1 clicks) "time" "times"))])]}))
-
-(def *session
+         
+(def initial-session
   (-> (reduce o/add-rule (o/->session) components)
       (o/insert ::global ::clicks 0)
-      o/fire-rules
-      atom))
+      o/fire-rules))
+
+(defonce *session
+  (atom initial-session))
+ 
+ (swap! *session  ;; Required for hot reloading to work correctly
+  (fn [session]
+    (->> (o/query-all session)
+         (reduce o/insert initial-session)
+         o/fire-rules)))
 
 (rum/mount (click-counter *session) (js/document.querySelector "#app"))
 ```
