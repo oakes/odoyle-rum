@@ -127,7 +127,8 @@
                         (o/->Rule ~rule-key
                                   (mapv o/map->Condition '~conditions)
                                   nil
-                                  (fn [arg#]
+                                  nil
+                                  (fn [session# arg#]
                                     (if *matches*
                                       (vswap! *matches* assoc ~rule-key arg#)
                                       (reset! *match# arg#)))
